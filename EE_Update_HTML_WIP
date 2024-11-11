@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <style>
+    #times {
+      width: 200px;
+      align: right;
+    }
+
+    #schedule {
+      width: 300px;
+    }
+
+    #addBtn {
+      width: 70px;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="update_ee_form">
+    <fieldset id="name_select">
+      <legend>Employee Name</legend>
+      <select class="form-control" id="ee_dropdown"></select>
+    </fieldset>
+    <fieldset id="ee_set">
+      <legend>Employee Details</legend>
+      <table id="ee_details">
+        <tr>
+          <td><label for="ee_id">EEID</label></td>
+          <td><label for="name">Name</label></td>
+        </tr>
+        <tr>
+          <td><input id="ee_id" type="text" required></td>
+          <td><input id="name" type="text" required></td>
+        </tr>
+        <tr>
+          <td><label for="email">Email</label></td>
+          <td><label for="location">Location</label></td>
+        </tr>
+        <tr>
+          <td><input id="email" type="email" required></td>
+          <td><input id="location" type="text" required></td>
+        </tr>
+      </table>
+    </fieldset>
+    <fieldset id="schedule_set">
+      <legend>Schedule</legend>
+      <table id="schedule">
+        <tr>
+          <td>Monday</td>
+          <td id="times"><input id="monday_start" type="time"><input id="monday_end" type="time"></td>
+        </tr>
+        <tr>
+          <td>Tuesday</td>
+          <td id="times"><input id="tuesday_start" type="time"><input id="tuesday_end" type="time">
+          </td>
+        </tr>
+        <tr>
+          <td>Wednesday</td>
+          <td id="times"><input id="wednesday_start" type="time"><input id="wednesday_end" type="time">
+          </td>
+        </tr>
+        <tr>
+          <td>Thursday</td>
+          <td id="times"><input id="thursday_start" type="time"><input id="thursday_end" type="time">
+          </td>
+        </tr>
+        <tr>
+          <td>Friday</td>
+          <td id="times"><input id="friday_start" type="time"><input id="friday_end" type="time">
+          </td>
+        </tr>
+      </table>
+    </fieldset>
+    <fieldset id="buttons_set">
+      <button id="updateBtn">Update</button>
+    </fieldset>
+
+  </form>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+  </script>
+  <script>
+    var ee_array_values;
+    function update_existing(){
+      var eeid = document.getElementById("ee_id");
+      var name = document.getElementById("name");
+      var email = document.getElementById("email");
+      var location = document.getElementById("location");
+      var mon_start = document.getElementById("monday_start");
+      var mon_end = document.getElementById("monday_end");
+      var tue_start = document.getElementById("tuesday_start");
+      var tue_end = document.getElementById("tuesday_end");
+      var wed_start = document.getElementById("wednesday_start");
+      var wed_end = document.getElementById("wednesday_end");
+      var thu_start = document.getElementById("thursday_start");
+      var thu_end = document.getElementById("thursday_end");
+      var fri_start = document.getElementById("friday_start");
+      var fri_end = document.getElementById("friday_end");
+
+      var new_ee_data = {eeid: eeid.value, name: name.value, email: email.value, location: location.value, mon_start: mon_start.value, mon_end: mon_end.value, tue_start: tue_start.value, tue_end: tue_end.value, wed_start: wed_start.value, wed_end: wed_end.value, thu_start: thu_start.value, thu_end: thu_end.value, fri_start: fri_start.value, fri_end: fri_end.value};
+
+      google.script.run.edit_processForm(new_ee_data);
+    }
+
+    function afterDialogLoads(){
+      google.script.run.withSuccessHandler(afterDropDownArrayLoads).getDropDownArray();
+    }
+
+    function afterDropDownArrayLoads(arrayOfArrays){
+      ee_array_values = arrayOfArrays.filter(function(r){return true;});
+      var ee_dropdown = document.getElementById("ee_dropdown");
+
+      arrayOfArrays.forEach(function(r){
+        var option = document.createElement("option");
+        option.textContent = r[1];
+        ee_dropdown.appendChild(option);
+      });
+      console.log("afterDropDownArrayLoads has ran")
+      afterDropDownChange();
+    }
+
+    function afterDropDownChange(){
+      var eeid = document.getElementById("ee_id");
+      var ee_dropdown_v = document.getElementById("ee_dropdown").value;
+      var filtered_array = ee_array_values.filter(function(r){return r[1] === ee_dropdown_v});
+      console.log(filtered_array)
+      var data_location = filtered_array.indexOf(ee_dropdown_v);
+      eeid.value = filtered_array[0][0];
+      console.log("afterDropDownChange has ran")
+    }
+
+    document.getElementById("ee_dropdown").addEventListener("change",afterDropDownChange);
+    document.getElementById("updateBtn").addEventListener("click",update_existing);
+    document.addEventListener("DOMContentLoaded",afterDialogLoads)
+  </script>
+</body>
+
+</html>
