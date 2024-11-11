@@ -1,0 +1,74 @@
+const ss = SpreadsheetApp.getActiveSpreadsheet();
+const ee_tab = ss.getSheetByName('Employees')
+const ee_availability_tab = ss.getSheetByName('Availability');
+
+function onOpen() {
+  SpreadsheetApp.getUi() // Or DocumentApp or SlidesApp or FormApp.
+    .createMenu('Custom Menu')
+    .addItem('Add Employee', 'ee_add_form')
+    .addItem('Update Employees','update_ee_form')
+    .addToUi();
+}
+
+function ee_add_form() {
+  var html = HtmlService.createHtmlOutputFromFile('New_EE')
+    .setWidth(500)
+    .setHeight(500);
+  SpreadsheetApp.getUi() // Or DocumentApp or SlidesApp or FormApp.
+    .showModalDialog(html, 'Add New Employee');
+}
+
+function update_ee_form() {
+  var html = HtmlService.createHtmlOutputFromFile('Edit_EE')
+    .setWidth(500)
+    .setHeight(500);
+  SpreadsheetApp.getUi() // Or DocumentApp or SlidesApp or FormApp.
+    .showModalDialog(html, 'Update Employees');
+}
+
+function processForm(new_ee_data) {
+  var ee_new_row = ee_tab.getLastRow() + 1;
+  var avail_new_row = ee_availability_tab.getLastRow() + 1
+
+  var ee_tab_array = [new_ee_data.eeid, new_ee_data.name, new_ee_data.location, new_ee_data.email]
+  var availability_array = [new_ee_data.eeid, new_ee_data.name, new_ee_data.mon_start, new_ee_data.mon_end, new_ee_data.tue_start, new_ee_data.tue_end, new_ee_data.wed_start, new_ee_data.wed_end, new_ee_data.thu_start, new_ee_data.thu_end, new_ee_data.fri_start, new_ee_data.fri_end]
+
+  ee_tab.getRange(ee_new_row, 1, 1, ee_tab_array.length).setValues([ee_tab_array]);
+  ee_availability_tab.getRange(avail_new_row, 1, 1, availability_array.length).setValues([availability_array]);
+  return true;
+}
+
+function getDropDownArray(){
+  return ee_tab.getRange(2,1,ee_tab.getLastRow()-1,4).getValues();
+}
+
+function edit_processForm(formObject) {
+  var eeid = formObject.ee_id
+  var name = formObject.name
+  var email = formObject.email
+  var location = formObject.location
+  var mon_start = formObject.monday_start
+  var mon_end = formObject.monday_end
+  var tue_start = formObject.tuesday_start
+  var tue_end = formObject.tuesday_end
+
+  var ee_tab_array = [eeid, name, location, email]
+  var availability_array = [eeid, name, mon_start, mon_end, tue_start, tue_end]
+
+  var search_range = ee_tab.getRange(2, 1, ee_tab.getLastRow() - 1, 1).createTextFinder(formObject.ee_id).findAll();
+  if (search_range.length > 0) {
+    for (var i = 0; i < search_range.length; i++) {
+      search_range[i].offset(0, -1, 1, 2).setValues([ee_tab_array]);
+    }
+    var search_avail_rng = ee_availability_tab.getRange(2, 1, ee_availability_tab.getLastRow() - 1, 1).createTextFinder(formObject.ee_id).findAll();
+    for (var i = 0; i < search_avail_rng.length; i++) {
+      search_avail_rng[i].offset(0, -1, 1, 2).setValues([availability_array]);
+    }
+
+  } else {
+    var ee_new_row = ee_tab.getLastRow() + 1;
+    var avail_new_row = ee_availability_tab.getLastRow() + 1
+    ee_tab.getRange(ee_new_row, 1, 1, ee_tab_array.length).setValues([ee_tab_array]);
+    ee_availability_tab.getRange(avail_new_row, 1, 1, availability_array.length).setValues([availability_array]);
+  }
+}
